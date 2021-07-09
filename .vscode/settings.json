@@ -1,0 +1,26 @@
+{
+    "files.associations": {
+      "*.tcc": "cpp",
+      "bitset": "cpp",
+      "functional": "cpp",
+      "random": "cpp",
+      "fstream": "cpp",
+      "istream": "cpp",
+      "ostream": "cpp",
+      "sstream": "cpp",
+      "streambuf": "cpp",
+      "regex": "cpp",
+      "cmath": "c",
+      "vector": "cpp",
+      "exception": "cpp",
+      "algorithm": "cpp",
+      "iosfwd": "cpp",
+      "limits": "cpp",
+      "new": "cpp",
+      "system_error": "cpp",
+      "tuple": "cpp",
+      "type_traits": "cpp",
+      "typeinfo": "cpp",
+      "cstdlib": "cpp"
+    }
+}
