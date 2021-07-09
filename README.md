@@ -47,6 +47,9 @@ To upload the data
 
 https://github.com/me-no-dev/ESPAsyncWebServer#using-platformio
 
+## Searching libraries
+
+https://platformio.org/lib/search?query=si7021
 ## OTA
 
 pio run -t upload --upload-port square.local

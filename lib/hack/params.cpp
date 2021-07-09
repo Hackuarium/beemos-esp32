@@ -160,26 +160,13 @@ void printCompactParameters(Print* output) {
 }
 
 void resetParameters() {
-  setAndSaveParameter(PARAM_BRIGHTNESS, 255);
-  setAndSaveParameter(PARAM_INTENSITY, 4);
-  setAndSaveParameter(PARAM_SPEED, 17);
-  setAndSaveParameter(PARAM_CURRENT_PROGRAM, 3);
-  setAndSaveParameter(PARAM_COLOR_MODEL, 8);
-  setAndSaveParameter(PARAM_COLOR_CHANGE_SPEED, 3);
-  setAndSaveParameter(PARAM_COLOR_DECREASE_MODEL, 7);
-  setAndSaveParameter(PARAM_NB_LINE, 16);
-  setAndSaveParameter(PARAM_NB_LED_PER_LINE, 16);
-  setAndSaveParameter(PARAM_LAYOUT_MODEL, 1);
-  setAndSaveParameter(PARAM_COLOR_MODEL, 0);
-  setAndSaveParameter(PARAM_SCHEDULE, 0b11);
-  setAndSaveParameter(PARAM_ACTION_1, -1);
-  setAndSaveParameter(PARAM_ACTION_2, -1);
-  setAndSaveParameter(PARAM_ACTION_3, -1);
-  setAndSaveParameter(PARAM_ACTION_4, -1);
+  setAndSaveParameter(PARAM_TEMPERATURE, 0);
+  setAndSaveParameter(PARAM_HUMIDITY, 0);
+;
 }
 
 void checkParameters() {
-  if (getParameter(PARAM_BRIGHTNESS) < 0) {
+  if (getParameter(PARAM_TEMPERATURE) < 0) {
     resetParameters();
   }
 }

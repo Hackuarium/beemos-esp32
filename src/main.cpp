@@ -10,16 +10,17 @@ void taskOTA();
 void taskMDNS();
 void taskWifi();
 void taskMQTT();
+void taskSI7021();
+void taskOneWire();
 
 void setup() {
   Serial.begin(115200);  // only for debug purpose
   setupParameters();
-  if (getParameter(PARAM_CURRENT_PROGRAM)==2) {
-    setParameter(PARAM_CURRENT_PROGRAM, 5);
-  }
   taskSerial();
   taskWebserver();
   taskNTPD();
+  taskSI7021();
+  taskOneWire();
   taskOTA();
   taskMDNS();
   taskWifi();
