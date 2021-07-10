@@ -19,6 +19,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 
 
 void TaskMQTT(void* pvParameters) {
+
   getParameter("mqtt.broker", broker);
   getParameter("mqtt.topic", topic);
 
@@ -32,14 +33,19 @@ void TaskMQTT(void* pvParameters) {
 
   Serial.println("Connecting to MQTT...");
   mqttClient.onConnect(onMqttConnect);
-  mqttClient.onDisconnect(onMqttDisconnect);
+ // vTaskDelay(200);
+// mqttClient.onDisconnect(onMqttDisconnect);
   mqttClient.onPublish(onMqttPublish);
 //  mqttClient.onSubscribe(onMqttSubscribe);
 //  mqttClient.onUnsubscribe(onMqttUnsubscribe);
-  mqttClient.onMessage(onMqttMessage);
+  // mqttClient.onMessage(onMqttMessage);
 
   while (true) {
-    uint16_t packetIdPub1 = mqttClient.publish("test/esp", 0, true, "Hello");    
+    Serial.println("Publishing Temperature and humidity from Si7021...");
+    float p_temperature = getParameter(PARAM_TEMPERATURE)/100.0;
+    float p_humidity = getParameter(PARAM_HUMIDITY)/100.0;
+    uint16_t packetId1 = mqttClient.publish("esp32/temperature", 0, true, String(p_temperature).c_str()); 
+    uint16_t packetId2 = mqttClient.publish("esp32/humidity", 0, true, String(p_humidity).c_str());    
     vTaskDelay(10 * 1000);
   }
 }
@@ -60,7 +66,7 @@ void onMqttSubscribe(uint16_t packetId, uint8_t qos) {
 
 void taskMQTT() {
   xTaskCreatePinnedToCore(TaskMQTT, "TaskMQTT",
-                          20000,  // This stack size can be checked & adjusted
+                          25000,  // This stack size can be checked & adjusted
                                   // by reading the Stack Highwater
                           NULL,
                           3,  // Priority, with 3 (configMAX_PRIORITIES - 1)
@@ -75,9 +81,9 @@ void onMqttConnect(bool sessionPresent) {
   Serial.println("Connected to MQTT.");
   Serial.print("Session present: ");
   Serial.println(sessionPresent);
-  uint16_t packetIdSub = mqttClient.subscribe(topic, 2);
-  Serial.print("Subscribing at QoS 2, packetId: ");
-  Serial.println(packetIdSub);
+  // uint16_t packetIdSub = mqttClient.subscribe(topic, 2);
+  // Serial.print("Subscribing at QoS 2, packetId: ");
+  // Serial.println(packetIdSub);
 }
 
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {

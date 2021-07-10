@@ -24,7 +24,7 @@ void setup() {
   taskOTA();
   taskMDNS();
   taskWifi();
-//  taskMQTT();
+  taskMQTT();
   taskBlink();
 }
 
