@@ -25,13 +25,13 @@ void TaskOneWire(void* pvParameters) {
     // Define filtering of "-127" values, using a maximum number of tries before really assigning -127
     byte tries = 0; 
     byte max_tries=5;
-    while(last_temp1==-127 && tries<max_tries){
+    while((last_temp1==0||last_temp1==-12700) && tries<max_tries){
       last_temp1 = sensors_oneWire.getTempCByIndex(0)*100;
       tries++;
     }
     tries=0;
     int last_temp2 = sensors_oneWire.getTempCByIndex(1)*100;
-    while(last_temp2==-127 && tries<max_tries){
+    while((last_temp2==0||last_temp2==-12700) && tries<max_tries){
       last_temp2 = sensors_oneWire.getTempCByIndex(1)*100;
       tries++;
     }

@@ -18,7 +18,7 @@ void TaskSI7021(void* pvParameters) {
     int s_temp = 100*sensor.readTemperature();
     byte tries=0;
     byte max_tries=5;
-    while (s_temp == -0.01 && tries<max_tries){
+    while ((s_temp ==0||s_temp == -1) && tries<max_tries){
       s_temp = 100*sensor.readTemperature();
       tries++;
     }
@@ -26,7 +26,7 @@ void TaskSI7021(void* pvParameters) {
     int s_humidity = 100*sensor.readHumidity();
     tries=0;
 	  setParameter(PARAM_TEMPERATURE, s_temp);
-        while (s_humidity == -0.01 && tries<max_tries){
+        while ((s_humidity == 0 || s_humidity == -1) && tries<max_tries){
       s_humidity = 100*sensor.readHumidity();
       tries++;
     }
