@@ -44,8 +44,12 @@ void TaskMQTT(void* pvParameters) {
     Serial.println("Publishing Temperature and humidity from Si7021...");
     float p_temperature = getParameter(PARAM_TEMPERATURE)/100.0;
     float p_humidity = getParameter(PARAM_HUMIDITY)/100.0;
-    uint16_t packetId1 = mqttClient.publish("esp32/temperature", 0, true, String(p_temperature).c_str()); 
-    uint16_t packetId2 = mqttClient.publish("esp32/humidity", 0, true, String(p_humidity).c_str());    
+    float p_temperature1w = getParameter(PARAM_TEMPERATURE_EXT)/100.0;
+    float p_temperature1w2 = getParameter(PARAM_TEMPERATURE_EXT2)/100.0;
+    uint16_t packetId1 = mqttClient.publish("esp32/temperature", 0, true, String(p_temperature).c_str());
+    uint16_t packetId2 = mqttClient.publish("esp32/humidity", 0, true, String(p_humidity).c_str()); 
+    uint16_t packetId3 = mqttClient.publish("esp32/temperature1wire", 0, true, String(p_temperature1w).c_str()); 
+    uint16_t packetId4 = mqttClient.publish("esp32/temperature1wire2", 0, true, String(p_temperature1w2).c_str());    
     vTaskDelay(10 * 1000);
   }
 }
@@ -66,7 +70,7 @@ void onMqttSubscribe(uint16_t packetId, uint8_t qos) {
 
 void taskMQTT() {
   xTaskCreatePinnedToCore(TaskMQTT, "TaskMQTT",
-                          25000,  // This stack size can be checked & adjusted
+                          16000,  // This stack size can be checked & adjusted
                                   // by reading the Stack Highwater
                           NULL,
                           3,  // Priority, with 3 (configMAX_PRIORITIES - 1)

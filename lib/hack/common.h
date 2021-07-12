@@ -12,3 +12,4 @@ extern int16_t parameters[MAX_PARAM];
 #define PARAM_TEMPERATURE           0 // A
 #define PARAM_HUMIDITY              1
 #define PARAM_TEMPERATURE_EXT       2
+#define PARAM_TEMPERATURE_EXT2      3
