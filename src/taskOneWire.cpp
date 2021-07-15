@@ -12,8 +12,7 @@ void TaskOneWire(void* pvParameters) {
   sensor_oneWire.begin();
 
   while (true) {
-	  sensor_oneWire.requestTemperatures();
-
+    sensor_oneWire.requestTemperatures();
 	  setParameter(PARAM_TEMPERATURE_EXT, sensor_oneWire.getTempCByIndex(0)*100);
 
     vTaskDelay(1000);
