@@ -16,6 +16,7 @@ void TaskOneWire(void* pvParameters) {
   
   
   while (true) {
+<<<<<<< HEAD
     
 	  sensors_oneWire.requestTemperatures();
 
@@ -35,6 +36,10 @@ void TaskOneWire(void* pvParameters) {
       last_temp2 = sensors_oneWire.getTempCByIndex(1)*100;
       tries++;
     }
+=======
+    sensor_oneWire.requestTemperatures();
+	  setParameter(PARAM_TEMPERATURE_EXT, sensor_oneWire.getTempCByIndex(0)*100);
+>>>>>>> a930e0411fd1ecdc6e6a83ca4c9a458da155c72a
 
     // vTaskDelay(1000);
    // Serial.println(String("TEMP_DALLAS1 = " + last_temp1));
