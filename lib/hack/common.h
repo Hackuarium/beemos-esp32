@@ -1,5 +1,7 @@
 #include <Arduino.h>
 
+// #define THR_WIRE_MASTER 1
+
 #define LED_BUILTIN 5
 
 #define MAX_PARAM 52
