@@ -24,8 +24,10 @@ void TaskOLEDscreen(void* pvParameters) {
   display.clear();
   display.setTextAlignment(TEXT_ALIGN_LEFT);
   display.setFont(ArialMT_Plain_16);
+  display.setFont(ArialMT_Plain_24);
 
    while (true){
+	   if (false) {
   String p_temperature = String(getParameter(PARAM_TEMPERATURE)/100.0);
   String p_humidity = String(getParameter(PARAM_HUMIDITY)/100.0);
   String p_temperature2 = String(getParameter(PARAM_TEMPERATURE_EXT)/100.0);
@@ -34,12 +36,14 @@ void TaskOLEDscreen(void* pvParameters) {
   display.drawString(0 , 0 , p_temperature + "°C");
   display.drawStringMaxWidth(0 , 20 , 128, p_humidity +"%");
   display.drawString(0 , 40 , p_temperature2 + "°C " + p_temperature3 + "°C");
-  //display.drawString(0, 0, rssi); 
+	   }
+
+  display.clear();
+  display.drawString(0, 0,  String(getParameter(PARAM_WIFI_RSSI))+" dB"); 
   
   display.display();  
   vTaskDelay(1000);
   }
-  vTaskDelay(10);
 }
 
 void taskOLEDscreen() {
