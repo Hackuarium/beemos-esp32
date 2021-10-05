@@ -1,5 +1,6 @@
 #include "./params.h"
 #include <WiFi.h>
+#include <esp_wifi.h>
 
 char ssid[20];
 char password[20];
@@ -12,7 +13,24 @@ void TaskWifi(void* pvParameters) {
   Serial.print("Using password ");
   Serial.println(password);
 
-  WiFi.mode(WIFI_STA);
+if (false) { //  access point
+Serial.println("Starting wifi server");
+ WiFi.mode(WIFI_AP);
+ esp_wifi_set_protocol( WIFI_IF_AP, WIFI_PROTOCOL_LR );
+  WiFi.softAP(ssid, password);
+
+  IPAddress IP = WiFi.softAPIP();
+  Serial.print("AP IP address: ");
+  Serial.println(IP);
+
+
+  while (true) {
+    vTaskDelay(1000);
+     //  setParameter(PARAM_WIFI_RSSI, WiFi.RSSI());
+  }
+} else {
+	 WiFi.mode(WIFI_STA);
+	  esp_wifi_set_protocol( WIFI_IF_STA, WIFI_PROTOCOL_LR );
   WiFi.begin(ssid, password);
 
   // Wait for connection
@@ -28,13 +46,16 @@ void TaskWifi(void* pvParameters) {
   Serial.println(WiFi.localIP());
 
   while (true) {
-    vTaskDelay(10000);
+    vTaskDelay(1000);
       if (WiFi.status() != WL_CONNECTED) {
         WiFi.disconnect();
         vTaskDelay(5000);
         WiFi.reconnect();
       }
+       setParameter(PARAM_WIFI_RSSI, WiFi.RSSI());
   }
+}
+ 
 }
 
 void taskWifi() {
