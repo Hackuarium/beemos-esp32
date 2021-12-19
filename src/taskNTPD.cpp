@@ -60,9 +60,9 @@ int getSeconds() {
 }
 
 void taskNTPD() {
-  // Now set up two tasks to rntpdun independently.
+  // Now set up two tasks to run independently.
   xTaskCreatePinnedToCore(TaskNTPD, "TaskNTPD",
-                          20000,  // This stack size can be checked & adjusted
+                          8000,  // This stack size can be checked & adjusted
                                   // by reading the Stack Highwater
                           NULL,
                           3,  // Priority, with 3 (configMAX_PRIORITIES - 1)

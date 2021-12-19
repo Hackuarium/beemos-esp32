@@ -67,10 +67,10 @@ void TaskWebserver(void* pvParameters) {
 void taskWebserver() {
   // Now set up two tasks to run independently.
   xTaskCreatePinnedToCore(TaskWebserver, "TaskWebserver",
-                          20000,  // This stack size can be checked & adjusted
+                          4000,  // This stack size can be checked & adjusted
                                   // by reading the Stack Highwater
                           NULL,
-                          3,  // Priority, with 3 (configMAX_PRIORITIES - 1)
+                          1,  // Priority, with 3 (configMAX_PRIORITIES - 1)
                               // being the highest, and 0 being the lowest.
                           NULL, 1);
 }

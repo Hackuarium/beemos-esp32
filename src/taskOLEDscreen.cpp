@@ -20,38 +20,44 @@ void TaskOLEDscreen(void* pvParameters) {
   (void)pvParameters;
   // Initialize screen
   display.init();
+  vTaskDelay(300);
   display.flipScreenVertically();  
-  display.clear();
   display.setTextAlignment(TEXT_ALIGN_LEFT);
-  display.setFont(ArialMT_Plain_16);
+// display.setFont(ArialMT_Plain_16);
   display.setFont(ArialMT_Plain_24);
 
-   while (true){
+  while (true){
 	   if (false) {
-  String p_temperature = String(getParameter(PARAM_TEMPERATURE)/100.0);
-  String p_humidity = String(getParameter(PARAM_HUMIDITY)/100.0);
-  String p_temperature2 = String(getParameter(PARAM_TEMPERATURE_EXT)/100.0);
-  String p_temperature3 = String(getParameter(PARAM_TEMPERATURE_EXT2)/100.0);
-  display.clear();
-  display.drawString(0 , 0 , p_temperature + "°C");
-  display.drawStringMaxWidth(0 , 20 , 128, p_humidity +"%");
-  display.drawString(0 , 40 , p_temperature2 + "°C " + p_temperature3 + "°C");
+
 	   }
 
-  display.clear();
-  display.drawString(0, 0,  String(getParameter(PARAM_WIFI_RSSI))+" dB"); 
-  
-  display.display();  
-  vTaskDelay(1000);
+    String p_temperature = String(getParameter(PARAM_TEMPERATURE)/100.0);
+    String p_humidity = String(getParameter(PARAM_HUMIDITY)/100.0);
+    String p_temperature2 = String(getParameter(PARAM_TEMPERATURE_EXT)/100.0);
+    String p_temperature3 = String(getParameter(PARAM_TEMPERATURE_EXT2)/100.0);
+    display.clear();
+    display.drawString(0 , 0 , p_temperature + "°C");
+    display.drawStringMaxWidth(0 , 20 , 128, p_humidity +"%");
+   // Serial.println("p_temp = "+p_temperature);
+   // Serial.println("p_humidity = "+p_humidity);
+    vTaskDelay(300);
+    String p_wifi_rssi =String(getParameter(PARAM_WIFI_RSSI));
+    // Show RSSI only once it's initialized (i.e. once WiFi is connected)
+    if(p_wifi_rssi != "0"){
+      display.drawString(0, 40, p_wifi_rssi+" dB");
+    }
+    display.display();
+    vTaskDelay(1000); 
+
   }
 }
 
 void taskOLEDscreen() {
   xTaskCreatePinnedToCore(TaskOLEDscreen, "TaskOLEDscreen",
-                          2000,  // This stack size can be checked & adjusted by
+                          2500,  // This stack size can be checked & adjusted by
                                  // reading the Stack Highwater
                           NULL,
-                          2,  // Priority, with 3 (configMAX_PRIORITIES - 1)
+                          3,  // Priority, with 3 (configMAX_PRIORITIES - 1)
                               // being the highest, and 0 being the lowest.
                           NULL, 1);
 }

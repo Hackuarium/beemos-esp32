@@ -70,10 +70,10 @@ void onMqttSubscribe(uint16_t packetId, uint8_t qos) {
 
 void taskMQTT() {
   xTaskCreatePinnedToCore(TaskMQTT, "TaskMQTT",
-                          16000,  // This stack size can be checked & adjusted
+                          8000,  // This stack size can be checked & adjusted
                                   // by reading the Stack Highwater
                           NULL,
-                          3,  // Priority, with 3 (configMAX_PRIORITIES - 1)
+                          0,  // Priority, with 3 (configMAX_PRIORITIES - 1)
                               // being the highest, and 0 being the lowest.
                           NULL, 1);
 }

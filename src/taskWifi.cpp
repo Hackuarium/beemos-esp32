@@ -29,14 +29,15 @@ Serial.println("Starting wifi server");
      //  setParameter(PARAM_WIFI_RSSI, WiFi.RSSI());
   }
 } else {
-	 WiFi.mode(WIFI_STA);
-	  esp_wifi_set_protocol( WIFI_IF_STA, WIFI_PROTOCOL_LR );
-  WiFi.begin(ssid, password);
 
+	WiFi.mode(WIFI_STA);
+	esp_wifi_set_protocol( WIFI_IF_STA, WIFI_PROTOCOL_11B | WIFI_PROTOCOL_11G | WIFI_PROTOCOL_11N );
+  WiFi.begin(ssid, password);
+ // vTaskDelay(500);
   // Wait for connection
   while (WiFi.status() != WL_CONNECTED) {
     vTaskDelay(500);
-    Serial.print(".");
+    Serial.print("."); 
   }
 
     Serial.println("");
@@ -64,7 +65,7 @@ void taskWifi() {
                           8000,  // This stack size can be checked & adjusted by
                                  // reading the Stack Highwater
                           NULL,
-                          2,  // Priority, with 3 (configMAX_PRIORITIES - 1)
+                          3,  // Priority, with 3 (configMAX_PRIORITIES - 1)
                               // being the highest, and 0 being the lowest.
                           NULL, 1);
 }
