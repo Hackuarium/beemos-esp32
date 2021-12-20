@@ -15,6 +15,7 @@ void taskMQTT();
 void taskSI7021();
 void taskOneWire();
 void taskOLEDscreen();
+void taskBatteryLevel();
 
 void setup() {
   Serial.begin(115200);  // only for debug purpose
@@ -29,6 +30,7 @@ void setup() {
   taskMDNS();
   taskWifi();
   taskMQTT();
+  taskBatteryLevel();
   taskBlink();
 }
 

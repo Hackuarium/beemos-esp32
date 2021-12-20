@@ -35,19 +35,37 @@ void TaskOLEDscreen(void* pvParameters) {
     String p_humidity = String(getParameter(PARAM_HUMIDITY)/100.0);
     String p_temperature2 = String(getParameter(PARAM_TEMPERATURE_EXT)/100.0);
     String p_temperature3 = String(getParameter(PARAM_TEMPERATURE_EXT2)/100.0);
+
+    display.setFont(ArialMT_Plain_24);
+ 
     display.clear();
+    if(p_temperature == "0.00" || p_temperature == "-0.01" || p_humidity == "0.00" || p_humidity == "-0.01"){
+       // Serial.println("Caught error from Si7021");
+        display.drawString(0 , 0 , "Si7021 not");
+        display.drawStringMaxWidth(0 , 20 , 128, "detected");
+    }
+    else{
     display.drawString(0 , 0 , p_temperature + "°C");
     display.drawStringMaxWidth(0 , 20 , 128, p_humidity +"%");
    // Serial.println("p_temp = "+p_temperature);
    // Serial.println("p_humidity = "+p_humidity);
+    }
+  
+ 
+
     vTaskDelay(300);
     String p_wifi_rssi =String(getParameter(PARAM_WIFI_RSSI));
     // Show RSSI only once it's initialized (i.e. once WiFi is connected)
     if(p_wifi_rssi != "0"){
+      display.setFont(ArialMT_Plain_24);
       display.drawString(0, 40, p_wifi_rssi+" dB");
     }
+    else{
+      display.setFont(ArialMT_Plain_10);
+      display.drawString(0, 50, "Connecting to WiFi");
+    }
     display.display();
-    vTaskDelay(1000); 
+    vTaskDelay(300); 
 
   }
 }

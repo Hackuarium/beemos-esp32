@@ -41,15 +41,34 @@ void TaskMQTT(void* pvParameters) {
   // mqttClient.onMessage(onMqttMessage);
 
   while (true) {
-    Serial.println("Publishing Temperature and humidity from Si7021...");
+    Serial.println("Publishing To MQTT server...");
     float p_temperature = getParameter(PARAM_TEMPERATURE)/100.0;
     float p_humidity = getParameter(PARAM_HUMIDITY)/100.0;
     float p_temperature1w = getParameter(PARAM_TEMPERATURE_EXT)/100.0;
     float p_temperature1w2 = getParameter(PARAM_TEMPERATURE_EXT2)/100.0;
-    uint16_t packetId1 = mqttClient.publish("esp32/temperature", 0, true, String(p_temperature).c_str());
-    uint16_t packetId2 = mqttClient.publish("esp32/humidity", 0, true, String(p_humidity).c_str()); 
-    uint16_t packetId3 = mqttClient.publish("esp32/temperature1wire", 0, true, String(p_temperature1w).c_str()); 
-    uint16_t packetId4 = mqttClient.publish("esp32/temperature1wire2", 0, true, String(p_temperature1w2).c_str());    
+    int p_batteryLevel = getParameter(PARAM_BATTERY_LEVEL);
+    // Only transmit values, not error codes
+    if (String(p_temperature) != "0.01" && String(p_temperature) != "-0.01" && p_temperature != 0){
+      uint16_t packetId1 = mqttClient.publish("esp32/temperature", 0, true, String(p_temperature).c_str());
+      Serial.println("p_temperature = "+String(p_temperature));
+    }
+    // Only transmit values, not error codes
+    if (p_humidity != 0 && String(p_humidity) != "-0.01"){
+      uint16_t packetId2 = mqttClient.publish("esp32/humidity", 0, true, String(p_humidity).c_str()); 
+      Serial.println("p_humidity = "+String(p_humidity));
+    }
+     // Only transmit values, not error codes
+    if (p_temperature1w != -127 && p_temperature1w != 0){
+      uint16_t packetId3 = mqttClient.publish("esp32/temperature1wire", 0, true, String(p_temperature1w).c_str());
+      Serial.println("p_temperature1w = "+String(p_temperature1w));
+    }
+      // Only transmit values, not error codes
+    if (p_temperature1w2 != -127 && p_temperature1w2 != 0){
+      uint16_t packetId3 = mqttClient.publish("esp32/temperature1wire2", 0, true, String(p_temperature1w2).c_str());
+      Serial.println("p_temperature1w2 = "+String(p_temperature1w2));
+    }
+    // This is the raw battery level (~1500 empty ~2270 full battery, non linear to be tested with other batteries - Value may be 40 higher when in full charge)
+    uint16_t packetId5 = mqttClient.publish("esp32/batteryLevel", 0, true, String(p_batteryLevel).c_str());   
     vTaskDelay(10 * 1000);
   }
 }

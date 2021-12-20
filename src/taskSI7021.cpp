@@ -8,12 +8,11 @@ void TaskSI7021(void* pvParameters) {
   vTaskDelay(100);
   (void)pvParameters;
   
-  if (!sensor.begin()) {
+  while (!sensor.begin()) {                            
     Serial.println("Did not find Si7021 sensor!");
+    vTaskDelay(200);  
 
-    while (true)
-      ;
-      
+    
   }
 
 
@@ -38,8 +37,9 @@ void TaskSI7021(void* pvParameters) {
       vTaskDelay(100);
       tries++;
     }
-
-	  setParameter(PARAM_HUMIDITY, s_humidity);
+    if (s_humidity != 0 && s_humidity != -1 && s_humidity != 1){  // Set parameter except if there were errors despite max_tries
+	    setParameter(PARAM_HUMIDITY, s_humidity);
+    }
 
     vTaskDelay(1000);
   }

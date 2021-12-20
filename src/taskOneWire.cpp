@@ -24,17 +24,25 @@ void TaskOneWire(void* pvParameters) {
    // Serial.print("TEMP_DALLAS1 = ");
    int lastTemp=sensors_oneWire.getTempCByIndex(0)*100;
    // Give a second chance in case an error is produced
-   if(lastTemp==-127){
-    lastTemp=sensors_oneWire.getTempCByIndex(0)*100;
+  // Give a second chance in case an error is produced
+  byte max_tries = 5;
+  byte tries = 0;
+   while(lastTemp != -127 || tries < max_tries){
+     lastTemp=sensors_oneWire.getTempCByIndex(0)*100;
+     tries++;
      vTaskDelay(200);
-   }  
+  //  Serial.println("Error from OneWire temperature1, retrying...");
+   } 
    // Serial.println(lastTemp);  
    // Serial.print("TEMP_DALLAS2 = ");
    int lastTemp2=sensors_oneWire.getTempCByIndex(1)*100;
   // Give a second chance in case an error is produced
-   if(lastTemp2==-127){
+   tries = 0;
+   while(lastTemp2!=-127 || tries < max_tries){
      lastTemp=sensors_oneWire.getTempCByIndex(1)*100;
+     tries++;
      vTaskDelay(200);
+    // Serial.println("Error from OneWire temperature2, retrying...");
    }  
    // Serial.println(lastTemp2);    
 	  setParameter(PARAM_TEMPERATURE_EXT, sensors_oneWire.getTempCByIndex(0)*100);
