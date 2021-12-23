@@ -27,9 +27,10 @@ void TaskOLEDscreen(void* pvParameters) {
   display.setFont(ArialMT_Plain_24);
 
   while (true){
-	   if (false) {
 
-	   }
+    // Fetch number of menu to display from corresponding Parameter (set up by the rotary encoder)
+    int p_menu_number = getParameter(PARAM_MENU_NUMBER);
+    // Serial.println("p_menu_number = "+String(p_menu_number));
 
     String p_temperature = String(getParameter(PARAM_TEMPERATURE)/100.0);
     String p_humidity = String(getParameter(PARAM_HUMIDITY)/100.0);
@@ -39,18 +40,20 @@ void TaskOLEDscreen(void* pvParameters) {
     display.setFont(ArialMT_Plain_24);
  
     display.clear();
-    if(p_temperature == "0.00" || p_temperature == "-0.01" || p_humidity == "0.00" || p_humidity == "-0.01"){
+
+    if(p_menu_number == 0){  // Evaluate which menu should be displayed 
+
+      if(p_temperature == "0.00" || p_temperature == "-0.01" || p_humidity == "0.00" || p_humidity == "-0.01"){
        // Serial.println("Caught error from Si7021");
         display.drawString(0 , 0 , "Si7021 not");
         display.drawStringMaxWidth(0 , 20 , 128, "detected");
-    }
-    else{
-    display.drawString(0 , 0 , p_temperature + "°C");
-    display.drawStringMaxWidth(0 , 20 , 128, p_humidity +"%");
-   // Serial.println("p_temp = "+p_temperature);
-   // Serial.println("p_humidity = "+p_humidity);
-    }
-  
+      }
+      else{
+      display.drawString(0 , 0 , p_temperature + "°C");
+      display.drawStringMaxWidth(0 , 20 , 128, p_humidity +"%");
+     // Serial.println("p_temp = "+p_temperature);
+     // Serial.println("p_humidity = "+p_humidity);
+      }
  
 
     vTaskDelay(300);
@@ -67,7 +70,19 @@ void TaskOLEDscreen(void* pvParameters) {
     display.display();
     vTaskDelay(300); 
 
+   }
+
+    if(p_menu_number == 1){ // Evaluate which menu should be displayed, use switch if there are many 
+      display.clear();
+      vTaskDelay(20); 
+      display.drawString(0 , 0 ,  "MENU #2"); // Show "MENU #2" on OLED screen
+      display.display();
+      vTaskDelay(100); 
+    }
+
+
   }
+
 }
 
 void taskOLEDscreen() {

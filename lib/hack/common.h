@@ -16,5 +16,6 @@ extern int16_t parameters[MAX_PARAM];
 #define PARAM_TEMPERATURE_EXT       2
 #define PARAM_TEMPERATURE_EXT2      3
 
-#define PARAM_BATTERY_LEVEL        48 // Raw battery level, larger is better (non linear)
+#define PARAM_MENU_NUMBER          47 
+#define PARAM_BATTERY_LEVEL        48 // Raw NCR18650b Li-ion battery level, larger is better (non linear)
 #define PARAM_WIFI_RSSI            49 // AX  Wifi RSSI, larger is better

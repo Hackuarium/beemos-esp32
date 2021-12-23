@@ -41,7 +41,7 @@ void TaskMQTT(void* pvParameters) {
   // mqttClient.onMessage(onMqttMessage);
 
   while (true) {
-    Serial.println("Publishing To MQTT server...");
+    Serial.println("Publish to MQTT server task");
     float p_temperature = getParameter(PARAM_TEMPERATURE)/100.0;
     float p_humidity = getParameter(PARAM_HUMIDITY)/100.0;
     float p_temperature1w = getParameter(PARAM_TEMPERATURE_EXT)/100.0;
@@ -67,7 +67,7 @@ void TaskMQTT(void* pvParameters) {
       uint16_t packetId3 = mqttClient.publish("esp32/temperature1wire2", 0, true, String(p_temperature1w2).c_str());
       Serial.println("p_temperature1w2 = "+String(p_temperature1w2));
     }
-    // This is the raw battery level (~1500 empty ~2270 full battery, non linear to be tested with other batteries - Value may be 40 higher when in full charge)
+    // This is the raw NCR18650b Li-ion battery level (~1600 equivalent to 2.585V is almost empty (can't connect to WiFi anymore), ~2300 equivalent to 4.10V full battery, non linear to be tested with other batteries - Value may be 40 higher when in full charge)
     uint16_t packetId5 = mqttClient.publish("esp32/batteryLevel", 0, true, String(p_batteryLevel).c_str());   
     vTaskDelay(10 * 1000);
   }
