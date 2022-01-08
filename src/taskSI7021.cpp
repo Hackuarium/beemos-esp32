@@ -10,7 +10,7 @@ void TaskSI7021(void* pvParameters) {
   
   while (!sensor.begin()) {                            
     Serial.println("Did not find Si7021 sensor!");
-    vTaskDelay(200);  
+    vTaskDelay(300);  
 
     
   }

@@ -15,6 +15,8 @@ extern int16_t parameters[MAX_PARAM];
 #define PARAM_HUMIDITY              1
 #define PARAM_TEMPERATURE_EXT       2
 #define PARAM_TEMPERATURE_EXT2      3
+#define PARAM_TEMPERATURE_AHT21      4
+#define PARAM_HUMIDITY_AHT21     5
 
 #define PARAM_MENU_NUMBER          47 
 #define PARAM_BATTERY_LEVEL        48 // Raw NCR18650b Li-ion battery level, larger is better (non linear)

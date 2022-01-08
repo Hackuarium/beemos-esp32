@@ -3,6 +3,8 @@
 #include "./common.h"
 #include "./params.h"
 #include "taskNTPD.h"
+// For deep sleep
+#include "driver/adc.h"
 
 void taskBlink();
 void taskSerial();
@@ -17,9 +19,12 @@ void taskOneWire();
 void taskOLEDscreen();
 void taskBatteryLevel();
 void taskRotaryButton();
+void taskAHT21();
 
 void setup() {
   Serial.begin(115200);  // only for debug purpose
+  // After deepsleep
+  adc_power_on();
   setupParameters();
   taskSerial();
   taskWebserver();
@@ -34,6 +39,8 @@ void setup() {
   taskBatteryLevel();
   taskBlink();
   taskRotaryButton();
+  // taskAHT21();
+  
 }
 
 void loop() {

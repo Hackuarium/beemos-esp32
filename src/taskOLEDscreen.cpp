@@ -3,7 +3,7 @@
 #include "SSD1306.h"   // OLED screen model library
 
 
-// SSD OLED pin definitions
+// LORA pin definitions
 
 #define SCK     5    // GPIO5  -- SX1278's SCK
 #define MISO    19   // GPIO19 -- SX1278's MISO
@@ -12,6 +12,7 @@
 #define RST     14   // GPIO14 -- SX1278's RESET
 #define DI0     26   // GPIO26 -- SX1278's IRQ(Interrupt Request)
 #define BAND    868E6 // LoRa MHz
+
 
 // Create OLED instance "display"
 SSD1306 display(0x3c, 21, 22);
@@ -36,19 +37,22 @@ void TaskOLEDscreen(void* pvParameters) {
     String p_humidity = String(getParameter(PARAM_HUMIDITY)/100.0);
     String p_temperature2 = String(getParameter(PARAM_TEMPERATURE_EXT)/100.0);
     String p_temperature3 = String(getParameter(PARAM_TEMPERATURE_EXT2)/100.0);
+    String p_temperatureAHT21 = String(getParameter(PARAM_TEMPERATURE_AHT21)/100.0);
+    String p_humidityAHT21 = String(getParameter(PARAM_HUMIDITY_AHT21)/100.0);
 
     display.setFont(ArialMT_Plain_24);
  
+   
     display.clear();
-
+ 
     if(p_menu_number == 0){  // Evaluate which menu should be displayed 
 
       if(p_temperature == "0.00" || p_temperature == "-0.01" || p_humidity == "0.00" || p_humidity == "-0.01"){
        // Serial.println("Caught error from Si7021");
         display.drawString(0 , 0 , "Si7021 not");
         display.drawStringMaxWidth(0 , 20 , 128, "detected");
-      }
-      else{
+              }
+      else {
       display.drawString(0 , 0 , p_temperature + "°C");
       display.drawStringMaxWidth(0 , 20 , 128, p_humidity +"%");
      // Serial.println("p_temp = "+p_temperature);
@@ -56,7 +60,8 @@ void TaskOLEDscreen(void* pvParameters) {
       }
  
 
-    vTaskDelay(300);
+    
+     
     String p_wifi_rssi =String(getParameter(PARAM_WIFI_RSSI));
     // Show RSSI only once it's initialized (i.e. once WiFi is connected)
     if(p_wifi_rssi != "0"){
@@ -67,15 +72,28 @@ void TaskOLEDscreen(void* pvParameters) {
       display.setFont(ArialMT_Plain_10);
       display.drawString(0, 50, "Connecting to WiFi");
     }
+
     display.display();
     vTaskDelay(300); 
 
    }
 
+   // display.setFont(ArialMT_Plain_24); 
+
     if(p_menu_number == 1){ // Evaluate which menu should be displayed, use switch if there are many 
       display.clear();
-      vTaskDelay(20); 
-      display.drawString(0 , 0 ,  "MENU #2"); // Show "MENU #2" on OLED screen
+      vTaskDelay(20);
+      
+    if(p_temperatureAHT21 == "0.00" || p_temperatureAHT21 == "-0.01" || p_humidityAHT21 == "0.00" || p_humidityAHT21 == "-0.01"){
+      
+        display.drawString(0 , 0 , "AHT21 not");
+        display.drawStringMaxWidth(0 , 20 , 128, "detected");
+      }
+      else{
+      display.drawString(0 , 0 , p_temperatureAHT21 + "°C");
+      display.drawStringMaxWidth(0 , 20 , 128, p_humidityAHT21 +"%");
+      }
+
       display.display();
       vTaskDelay(100); 
     }
