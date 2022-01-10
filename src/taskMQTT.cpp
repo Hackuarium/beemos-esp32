@@ -23,6 +23,9 @@ void onMqttConnect(bool sessionPresent);
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
 void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total);
 
+// Name the device here (used in part in MQQT topics)
+String DEVICE_ID = "esp32";
+
 void goToDeepSleep(){
   
  Serial.println("Going to sleep now.");
@@ -86,38 +89,38 @@ void TaskMQTT(void* pvParameters) {
 
     // Only transmit values, not error codes
     if (String(p_temperature) != "0.01" && String(p_temperature) != "-0.01" && p_temperature != 0){
-      uint16_t packetId1 = mqttClient.publish("esp32/temperature", 0, true, String(p_temperature).c_str());
+      uint16_t packetId1 = mqttClient.publish((DEVICE_ID+"/temperature").c_str(), 0, true, String(p_temperature).c_str());
       Serial.println("p_temperature = "+String(p_temperature));
     }
     // Only transmit values, not error codes
     if (p_humidity != 0 && String(p_humidity) != "-0.01"){
-      uint16_t packetId2 = mqttClient.publish("esp32/humidity", 0, true, String(p_humidity).c_str()); 
+      uint16_t packetId2 = mqttClient.publish((DEVICE_ID+"/humidity").c_str(), 0, true, String(p_humidity).c_str()); 
       Serial.println("p_humidity = "+String(p_humidity));
     }
     // Only transmit values, not error codes
     if (String(p_temperatureAHT21) != "0.01" && String(p_temperatureAHT21) != "-0.01" && p_temperatureAHT21 != 0){
-      uint16_t packetId1 = mqttClient.publish("esp32/temperatureAHT21", 0, true, String(p_temperatureAHT21).c_str());
+      uint16_t packetId1 = mqttClient.publish((DEVICE_ID+"/temperatureAHT21").c_str(), 0, true, String(p_temperatureAHT21).c_str());
       Serial.println("p_temperatureAHT21 = "+String(p_temperatureAHT21));
     }
     // Only transmit values, not error codes
     if (p_humidityAHT21 != 0 && String(p_humidityAHT21) != "-0.01"){
-      uint16_t packetId2 = mqttClient.publish("esp32/humidityAHT21", 0, true, String(p_humidityAHT21).c_str()); 
+      uint16_t packetId2 = mqttClient.publish((DEVICE_ID+"/humidityAHT21").c_str(), 0, true, String(p_humidityAHT21).c_str()); 
       Serial.println("p_humidityAHT21 = "+String(p_humidityAHT21));
     }
      // Only transmit values, not error codes
     if (p_temperature1w != -127 && p_temperature1w != 0){
-      uint16_t packetId3 = mqttClient.publish("esp32/temperature1wire", 0, true, String(p_temperature1w).c_str());
+      uint16_t packetId3 = mqttClient.publish((DEVICE_ID+"/temperature1wire").c_str(), 0, true, String(p_temperature1w).c_str());
       Serial.println("p_temperature1w = "+String(p_temperature1w));
     }
       // Only transmit values, not error codes
     if (p_temperature1w2 != -127 && p_temperature1w2 != 0){
-      uint16_t packetId3 = mqttClient.publish("esp32/temperature1wire2", 0, true, String(p_temperature1w2).c_str());
+      uint16_t packetId3 = mqttClient.publish((DEVICE_ID+"/temperature1wire2").c_str(), 0, true, String(p_temperature1w2).c_str());
       Serial.println("p_temperature1w2 = "+String(p_temperature1w2));
     }
 
     // This is the raw NCR18650b Li-ion battery level (~1600 equivalent to 2.585V is almost empty (can't connect to WiFi anymore), ~2300 equivalent to 4.10V full battery, non linear to be tested with other batteries - Value may be 40 higher when in full charge)
     if(p_batteryLevel > 450){   // to avoid false values when charging
-    uint16_t packetId5 = mqttClient.publish("esp32/batteryLevel", 0, true, String(p_batteryLevel).c_str());   
+    uint16_t packetId5 = mqttClient.publish((DEVICE_ID+"/batteryLevel").c_str(), 0, true, String(p_batteryLevel).c_str());   
     // vTaskDelay(10 * 1000);
     }   
     Serial.println("Finished publishing to MQTT, GOING TO SLEEP NOW");
