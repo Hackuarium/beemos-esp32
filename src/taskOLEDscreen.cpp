@@ -29,8 +29,7 @@ void TaskOLEDscreen(void* pvParameters) {
 
   while (true){
 
-    // Fetch number of menu to display from corresponding Parameter (set up by the rotary encoder)
-    int p_menu_number = getParameter(PARAM_MENU_NUMBER);
+
     // Serial.println("p_menu_number = "+String(p_menu_number));
 
     String p_temperature = String(getParameter(PARAM_TEMPERATURE)/100.0);
@@ -45,7 +44,7 @@ void TaskOLEDscreen(void* pvParameters) {
    
     display.clear();
  
-    if(p_menu_number == 0){  // Evaluate which menu should be displayed 
+    if(MENU_NUMBER == 0){  // Evaluate which menu should be displayed 
 
       if(p_temperature == "0.00" || p_temperature == "-0.01" || p_humidity == "0.00" || p_humidity == "-0.01"){
        // Serial.println("Caught error from Si7021");
@@ -80,7 +79,7 @@ void TaskOLEDscreen(void* pvParameters) {
 
    // display.setFont(ArialMT_Plain_24); 
 
-    if(p_menu_number == 1){ // Evaluate which menu should be displayed, use switch if there are many 
+    if(MENU_NUMBER == 1){ // Evaluate which menu should be displayed, use switch if there are many 
       display.clear();
       vTaskDelay(20);
       

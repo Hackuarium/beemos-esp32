@@ -12,8 +12,10 @@
 //#define ROTARY_ENCODER_STEPS 2
 #define ROTARY_ENCODER_STEPS 4
 
+
 AiEsp32RotaryEncoder rotaryEncoder = AiEsp32RotaryEncoder(ROTARY_ENCODER_A_PIN, ROTARY_ENCODER_B_PIN, ROTARY_ENCODER_BUTTON_PIN, ROTARY_ENCODER_VCC_PIN, ROTARY_ENCODER_STEPS);
 
+byte MENU_NUMBER = 0;  // Set default value for menu
 
 void rotary_onButtonClick()
 {
@@ -45,6 +47,7 @@ void TaskRotaryButton(void* pvParameters) {
   rotaryEncoder.disableAcceleration(); //acceleration is now enabled by default - disable if you dont need it
   // rotaryEncoder.setAcceleration(250); //or set the value - larger number = more accelearation; 0 or 1 means disabled acceleration
 
+
   while (true) {
  
 
@@ -52,7 +55,7 @@ void TaskRotaryButton(void* pvParameters) {
 	{
     // Serial.println("MENU = "+String(rotaryEncoder.readEncoder()));
     // Store value of rotary encoder as paramater menu number
-    setParameter(PARAM_MENU_NUMBER, rotaryEncoder.readEncoder());
+    MENU_NUMBER = rotaryEncoder.readEncoder();
     vTaskDelay(100);
 	}
 	if (rotaryEncoder.isEncoderButtonClicked())

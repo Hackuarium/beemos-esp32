@@ -1,9 +1,38 @@
 #include "./params.h"
 #include <WiFi.h>
 #include <esp_wifi.h>
+#include <esp_task_wdt.h>                  // Watchdog timer 
+#include "SSD1306.h" 
+#include "driver/adc.h"                    // For deep sleep
+#include <esp_wifi.h>
+#include <esp_bt.h>
 
 char ssid[20];
 char password[20];
+
+
+void goToDeepSleepNoWifi(){          // This function is a mirror of the one in taskMQTT
+  
+ Serial.println("WiFi timeout reached, Going to sleep now.");
+ vTaskDelay(50);
+ // Prepare before sleep
+ Serial.println(millis());
+ Serial.flush();
+ // Create OLED instance "display" just to be able to switch it off from this task
+ SSD1306 display2(0x3c, 21, 22);
+ display2.displayOff();  // Switch off OLED
+ vTaskDelay(50);
+ WiFi.disconnect(true);
+ WiFi.mode(WIFI_OFF);
+ btStop();
+ adc_power_off();
+ esp_wifi_stop();
+ esp_bt_controller_disable();
+  esp_sleep_enable_timer_wakeup(LOG_INTERVAL_DURATION*1000000 - 1000*millis()); // Deep sleep timer between measurements in uS
+ esp_deep_sleep_start();  // Deep sleep here
+ vTaskDelay(50);
+ Serial.println("This is after deep sleep and will never be printed.");
+}
 
 void TaskWifi(void* pvParameters) {
   getParameter("wifi.ssid", ssid);
@@ -26,7 +55,7 @@ Serial.println("Starting wifi server");
 
   while (true) {
     vTaskDelay(1000);
-     //  setParameter(PARAM_WIFI_RSSI, WiFi.RSSI());
+    // setParameter(PARAM_WIFI_RSSI, WiFi.RSSI());
   }
 } else {
 
@@ -35,16 +64,30 @@ Serial.println("Starting wifi server");
   WiFi.begin(ssid, password);
  // vTaskDelay(500);
   // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) {
+  
+  byte counter = 0;
+  // While not connected for WIFI_CONNECT_TIMEOUT seconds
+  while (WiFi.status() != WL_CONNECTED && counter/2 <= WIFI_CONNECT_TIMEOUT) {
     vTaskDelay(500);
-    Serial.print("."); 
+    Serial.println("."); 
+    counter++;
+    Serial.println(counter/2);
   }
 
-    Serial.println("");
+  // In case WiFi not connected after trying for more than WIFI_CONNECT_TIMEOUT seconds
+  if(counter/2 >= WIFI_CONNECT_TIMEOUT){
+    Serial.println("Entered function");
+    // TO DO: log values on memory resilient to sleep (RTC internal/external TBD)
+
+    goToDeepSleepNoWifi();    
+  } else {
+
+  Serial.println("");
   Serial.print("Connected to ");
   Serial.println(ssid);
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
+  }
 
   while (true) {
     vTaskDelay(1000);
