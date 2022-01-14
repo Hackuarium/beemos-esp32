@@ -1,42 +1,19 @@
+#include "./common.h"
 #include "./params.h"
 #include <WiFi.h>
 #include <esp_wifi.h>
-#include <esp_task_wdt.h>                  // Watchdog timer 
-#include "SSD1306.h" 
-#include "driver/adc.h"                    // For deep sleep
-#include <esp_wifi.h>
-#include <esp_bt.h>
+
 
 char ssid[20];
 char password[20];
 
 
-void goToDeepSleepNoWifi(){          // This function is a mirror of the one in taskMQTT
-  
- Serial.println("WiFi timeout reached, Going to sleep now.");
- vTaskDelay(50);
- // Prepare before sleep
- Serial.println(millis());
- Serial.flush();
- // Create OLED instance "display" just to be able to switch it off from this task
- SSD1306 display2(0x3c, 21, 22);
- display2.displayOff();  // Switch off OLED
- vTaskDelay(50);
- WiFi.disconnect(true);
- WiFi.mode(WIFI_OFF);
- btStop();
- adc_power_off();
- esp_wifi_stop();
- esp_bt_controller_disable();
-  esp_sleep_enable_timer_wakeup(LOG_INTERVAL_DURATION*1000000 - 1000*millis()); // Deep sleep timer between measurements in uS
- esp_deep_sleep_start();  // Deep sleep here
- vTaskDelay(50);
- Serial.println("This is after deep sleep and will never be printed.");
-}
+
 
 void TaskWifi(void* pvParameters) {
   getParameter("wifi.ssid", ssid);
   getParameter("wifi.password",password);
+
   Serial.print("Trying to connect to ");
   Serial.println(ssid);
   Serial.print("Using password ");
@@ -76,10 +53,8 @@ Serial.println("Starting wifi server");
 
   // In case WiFi not connected after trying for more than WIFI_CONNECT_TIMEOUT seconds
   if(counter/2 >= WIFI_CONNECT_TIMEOUT){
-    Serial.println("Entered function");
-    // TO DO: log values on memory resilient to sleep (RTC internal/external TBD)
-
-    goToDeepSleepNoWifi();    
+    logToSDcard();     // log values on memory resilient to sleep 
+    goToDeepSleep();    
   } else {
 
   Serial.println("");
