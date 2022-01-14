@@ -1,4 +1,8 @@
 #include <Arduino.h>
+// SD card
+#include "FS.h"
+#include "SD.h"
+#include "SPI.h"
 
 // #define THR_WIRE_MASTER 1
 
@@ -7,7 +11,6 @@
 #define MAX_PARAM 52
 extern int16_t parameters[MAX_PARAM];
 
-#define MAX_LED                 256
 
 #define PARAM_ERROR                51
 
@@ -24,3 +27,16 @@ extern int16_t parameters[MAX_PARAM];
 extern byte MENU_NUMBER; 
 extern byte WIFI_CONNECT_TIMEOUT; 
 extern int32_t LOG_INTERVAL_DURATION;  //in seconds 
+
+void goToDeepSleep();
+void logToSDcard();
+
+// SD card primary functions
+void listDir(fs::FS &fs, const char * dirname, uint8_t levels);
+void createDir(fs::FS &fs, const char * path);
+void removeDir(fs::FS &fs, const char * path);
+void readFile(fs::FS &fs, const char * path);
+void writeFile(fs::FS &fs, const char * path, const char * message);
+void appendFile(fs::FS &fs, const char * path, const char * message);
+void renameFile(fs::FS &fs, const char * path1, const char * path2);
+void deleteFile(fs::FS &fs, const char * path);

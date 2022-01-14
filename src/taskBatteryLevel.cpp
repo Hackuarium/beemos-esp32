@@ -10,6 +10,11 @@ void TaskBatteryLevel(void* pvParameters) {
   while (true) {
     int raw_level = analogRead(36);
     vTaskDelay(100);
+    // Emergency sleep to allow the battery to charge enough to connect to WiFi (below this value WiFi will reset the board without allowing deepsleep)
+    if (raw_level < 1600 && raw_level > 1300){
+      Serial.println("EMERGENCY deep sleep");
+       goToDeepSleep();
+    }
     setParameter(PARAM_BATTERY_LEVEL, raw_level);
     // Serial.println("raw_level = "+String(raw_level));
     vTaskDelay(900);

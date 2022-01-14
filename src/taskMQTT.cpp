@@ -26,32 +26,6 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 // Name the device here (used in part in MQQT topics)
 String DEVICE_ID = "esp32";
 
-void goToDeepSleep(){
-  
- Serial.println("Going to sleep now.");
- vTaskDelay(50);
-  Serial.println(millis());
- // Prepare before sleep
- Serial.flush();
- // Create OLED instance "display" just to be able to switch it off from this task
- SSD1306 display2(0x3c, 21, 22);
- display2.displayOff();  // Switch off OLED
- vTaskDelay(50);
-  WiFi.disconnect(true);
-  WiFi.mode(WIFI_OFF);
-  btStop();
-
-  adc_power_off();
-  esp_wifi_stop();
-  esp_bt_controller_disable();
-
- esp_sleep_enable_timer_wakeup(LOG_INTERVAL_DURATION*1000000 - 1000*millis()); // Deep sleep timer between measurements in uS
-
- esp_deep_sleep_start();  // Deep sleep here
- vTaskDelay(50);
- Serial.println("This is after deep sleep and will never be printed.");
-}
-
 
 void TaskMQTT(void* pvParameters) {
 
@@ -85,7 +59,6 @@ void TaskMQTT(void* pvParameters) {
     float p_temperature1w2 = getParameter(PARAM_TEMPERATURE_EXT2)/100.0;
     int p_batteryLevel = getParameter(PARAM_BATTERY_LEVEL);
 
-    // Only transmit values, not error codes
 
     // Only transmit values, not error codes
     if (String(p_temperature) != "0.01" && String(p_temperature) != "-0.01" && p_temperature != 0){
@@ -119,7 +92,7 @@ void TaskMQTT(void* pvParameters) {
     }
 
     // This is the raw NCR18650b Li-ion battery level (~1600 equivalent to 2.585V is almost empty (can't connect to WiFi anymore), ~2300 equivalent to 4.10V full battery, non linear to be tested with other batteries - Value may be 40 higher when in full charge)
-    if(p_batteryLevel > 450){   // to avoid false values when charging
+    if(p_batteryLevel > 1000 && p_batteryLevel < 2700){   // to avoid false values when charging
     uint16_t packetId5 = mqttClient.publish((DEVICE_ID+"/batteryLevel").c_str(), 0, true, String(p_batteryLevel).c_str());   
     // vTaskDelay(10 * 1000);
     }   

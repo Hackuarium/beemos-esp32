@@ -26,8 +26,8 @@ void rotary_onButtonClick()
 		return;
 	}
 	lastTimePressed = millis();
-	Serial.print("button pressed at ");
-	Serial.println(millis());
+	// Serial.print("button pressed at ");
+	// Serial.println(millis());
 }
 
 
