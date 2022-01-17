@@ -6,11 +6,16 @@ char mdns[20];
 
 void TaskMDNS(void* pvParameters) {
   vTaskDelay(5000);
+  esp_task_wdt_add(NULL); //add current thread to WDT watch
   while (WiFi.status() != WL_CONNECTED) {
     vTaskDelay(1000);
   }
-
+ // Critical section (to avoid PARAMETERS being read/written at the same time by different tasks): use mutex
+  if(xSemaphoreTake(mutex,0) == pdTRUE){
   getParameter("wifi.mdns", mdns);
+  xSemaphoreGive(mutex);
+  }
+  
   Serial.print("Starting MDNS responder for: ");
   Serial.print(mdns);
   Serial.println(".local");

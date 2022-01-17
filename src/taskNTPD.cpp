@@ -5,6 +5,8 @@
 #include "./common.h"
 #include "./taskNTPD.h"
 
+
+// NTP settings
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP);
 
@@ -13,10 +15,15 @@ String timeStamp;
 
 struct tm timeInfo;
 
+
 void TaskNTPD(void* pvParameters) {
+
+  esp_task_wdt_add(NULL); //add current thread to WDT watch
+  
   while (WiFi.status() != WL_CONNECTED) {
     vTaskDelay(5000);
   }
+  
 
   // Initialize a NTPClient to get time
   timeClient.begin();
@@ -62,10 +69,10 @@ int getSeconds() {
 void taskNTPD() {
   // Now set up two tasks to run independently.
   xTaskCreatePinnedToCore(TaskNTPD, "TaskNTPD",
-                          8000,  // This stack size can be checked & adjusted
+                          4000,  // This stack size can be checked & adjusted
                                   // by reading the Stack Highwater
                           NULL,
-                          3,  // Priority, with 3 (configMAX_PRIORITIES - 1)
+                          1,  // Priority, with 3 (configMAX_PRIORITIES - 1)
                               // being the highest, and 0 being the lowest.
                           NULL, 1);
 }

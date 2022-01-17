@@ -6,6 +6,7 @@
 
 void TaskOneWire(void* pvParameters) {
   (void)pvParameters;
+  esp_task_wdt_add(NULL); //add current thread to WDT watch
   OneWire ds(33);
 
 
@@ -44,11 +45,15 @@ void TaskOneWire(void* pvParameters) {
      vTaskDelay(200);
     // Serial.println("Error from OneWire temperature2, retrying...");
    }  
-   // Serial.println(lastTemp2);    
+
+  // Critical section (to avoid PARAMETERS being read/written at the same time by different tasks): use mutex
+    if(xSemaphoreTake(mutex,0) == pdTRUE){  
 	  setParameter(PARAM_TEMPERATURE_EXT, sensors_oneWire.getTempCByIndex(0)*100);
   vTaskDelay(200);
 	  setParameter(PARAM_TEMPERATURE_EXT2, sensors_oneWire.getTempCByIndex(1)*100);
-      vTaskDelay(1000);
+    vTaskDelay(200);
+    xSemaphoreGive(mutex);
+   }
         
   }
   vTaskDelay(10);
@@ -57,7 +62,7 @@ void TaskOneWire(void* pvParameters) {
 void taskOneWire() {
   // Now set up two tasks to run independently.
   xTaskCreatePinnedToCore(TaskOneWire, "TaskOneWire",
-                          4048,  // This stack size can be checked & adjusted by
+                          2048,  // This stack size can be checked & adjusted by
                                  // reading the Stack Highwater
                           NULL,
                           3,  // Priority, with 3 (configMAX_PRIORITIES - 1)

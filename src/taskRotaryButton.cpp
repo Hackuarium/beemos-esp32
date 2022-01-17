@@ -38,6 +38,8 @@ void IRAM_ATTR readEncoderISR()
 
 void TaskRotaryButton(void* pvParameters) {
   (void)pvParameters;
+
+  esp_task_wdt_add(NULL); //add current thread to WDT watch
   
   rotaryEncoder.begin();
   rotaryEncoder.setup(readEncoderISR);
@@ -54,7 +56,7 @@ void TaskRotaryButton(void* pvParameters) {
    if (rotaryEncoder.encoderChanged())
 	{
     // Serial.println("MENU = "+String(rotaryEncoder.readEncoder()));
-    // Store value of rotary encoder as paramater menu number
+    // Store value of rotary encoder as MENU_NUMBER
     MENU_NUMBER = rotaryEncoder.readEncoder();
     vTaskDelay(100);
 	}

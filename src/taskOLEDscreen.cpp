@@ -19,29 +19,45 @@ SSD1306 display(0x3c, 21, 22);
 
 void TaskOLEDscreen(void* pvParameters) {
   (void)pvParameters;
+  esp_task_wdt_add(NULL); // add current thread to WDT watch
   // Initialize screen
   display.init();
-  vTaskDelay(300);
+  vTaskDelay(500);  // increase if text is shown on OLED but truncated or misplaced
   display.flipScreenVertically();  
   display.setTextAlignment(TEXT_ALIGN_LEFT);
 // display.setFont(ArialMT_Plain_16);
   display.setFont(ArialMT_Plain_24);
-
+ 
+  String msg = "Connecting to WiFi  ";
+  byte symToDisplay;   // Number of symbols to show on screen (while trying to connect to WiFi)
+  String p_temperature;
+  String p_humidity;
+  String p_temperature2;
+  String p_temperature3;
+  String p_temperatureAHT21;
+  String p_humidityAHT21;
+  String p_wifi_rssi;
+  
   while (true){
 
 
-    // Serial.println("p_menu_number = "+String(p_menu_number));
+    // Critical section (to avoid PARAMETERS being read/written at the same time by different tasks): use mutex
+    if(xSemaphoreTake(mutex,0) == pdTRUE){
 
-    String p_temperature = String(getParameter(PARAM_TEMPERATURE)/100.0);
-    String p_humidity = String(getParameter(PARAM_HUMIDITY)/100.0);
-    String p_temperature2 = String(getParameter(PARAM_TEMPERATURE_EXT)/100.0);
-    String p_temperature3 = String(getParameter(PARAM_TEMPERATURE_EXT2)/100.0);
-    String p_temperatureAHT21 = String(getParameter(PARAM_TEMPERATURE_AHT21)/100.0);
-    String p_humidityAHT21 = String(getParameter(PARAM_HUMIDITY_AHT21)/100.0);
+    p_temperature = String(getParameter(PARAM_TEMPERATURE)/100.0);
+    p_humidity = String(getParameter(PARAM_HUMIDITY)/100.0);
+    p_temperature2 = String(getParameter(PARAM_TEMPERATURE_EXT)/100.0);
+    p_temperature3 = String(getParameter(PARAM_TEMPERATURE_EXT2)/100.0);
+    p_temperatureAHT21 = String(getParameter(PARAM_TEMPERATURE_AHT21)/100.0);
+    p_humidityAHT21 = String(getParameter(PARAM_HUMIDITY_AHT21)/100.0);
+    p_wifi_rssi =String(getParameter(PARAM_WIFI_RSSI));
+    xSemaphoreGive(mutex);
+    }
+
 
     display.setFont(ArialMT_Plain_24);
- 
-   
+
+
     display.clear();
  
     if(MENU_NUMBER == 0){  // Evaluate which menu should be displayed 
@@ -59,21 +75,45 @@ void TaskOLEDscreen(void* pvParameters) {
       }
  
 
+   
+
     
-     
-    String p_wifi_rssi =String(getParameter(PARAM_WIFI_RSSI));
     // Show RSSI only once it's initialized (i.e. once WiFi is connected)
     if(p_wifi_rssi != "0"){
+      display.setFont(ArialMT_Plain_16);
+      display.drawString(0, 45, "WiFi OK");
+     // display.display();
+  
       display.setFont(ArialMT_Plain_24);
-      display.drawString(0, 40, p_wifi_rssi+" dB");
+      display.drawString(70, 42, p_wifi_rssi);
+      display.setFont(ArialMT_Plain_16);
+      display.drawString(108, 48, "dB");
+     // display.display();
+      vTaskDelay(50);  // increase delay if text is shown on OLED but truncated or misplaced
     }
     else{
+
+      
+
       display.setFont(ArialMT_Plain_10);
-      display.drawString(0, 50, "Connecting to WiFi");
+      display.drawString(0, 50, msg);
+      //for (byte i = 0; i < pointsToDisplay; i++){
+        msg = msg + ">";
+     // }
+      symToDisplay++;
+      vTaskDelay(150);  // slow down how fast points are shown sequentially
+      
+        if(symToDisplay == 6){
+          symToDisplay=0;
+          msg = "Connecting to WiFi  ";
+        }
+      
+      vTaskDelay(50);   // increase delay if text is shown on OLED but truncated or misplaced
+      
     }
 
     display.display();
-    vTaskDelay(300); 
+    vTaskDelay(250); 
 
    }
 

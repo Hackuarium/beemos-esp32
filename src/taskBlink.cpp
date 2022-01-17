@@ -3,7 +3,7 @@
 
 void TaskBlink(void* pvParameters) {
   (void)pvParameters;
-
+  esp_task_wdt_add(NULL); //add current thread to WDT watch
   pinMode(LED_BUILTIN, OUTPUT);
 
   while (true) {

@@ -11,6 +11,8 @@
 #include <esp_task_wdt.h>                  // Watchdog timer 
 
 
+
+
 AsyncMqttClient mqttClient;
 
 char broker[20];
@@ -23,14 +25,34 @@ void onMqttConnect(bool sessionPresent);
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
 void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total);
 
+ // Set Variables for different sensors and log
+float p_temperature;
+float p_humidity;
+float p_temperatureAHT21;
+float p_humidityAHT21;
+float p_temperature1w;
+float p_temperature1w2;
+int p_batteryLevel;
+String currentLog;
+
 // Name the device here (used in part in MQQT topics)
 String DEVICE_ID = "esp32";
 
 
+
+
+
+
 void TaskMQTT(void* pvParameters) {
 
+  esp_task_wdt_add(NULL); //add current thread to WDT watch
+
+  // Protect simulatneous read/Write of different tasks to common resource (parameters) using mutex
+  if(xSemaphoreTake(mutex,0) == pdTRUE){
   getParameter("mqtt.broker", broker);
   getParameter("mqtt.topic", topic);
+  xSemaphoreGive(mutex);
+  }
 
   while (WiFi.status() != WL_CONNECTED) {
     vTaskDelay(5000);
@@ -48,23 +70,43 @@ void TaskMQTT(void* pvParameters) {
 //  mqttClient.onSubscribe(onMqttSubscribe);
 //  mqttClient.onUnsubscribe(onMqttUnsubscribe);
   // mqttClient.onMessage(onMqttMessage);
-
+  RTClib myRTC;
   while (true) {
     Serial.println("Publish to MQTT server task");
-    float p_temperature = getParameter(PARAM_TEMPERATURE)/100.0;
-    float p_humidity = getParameter(PARAM_HUMIDITY)/100.0;
-    float p_temperatureAHT21 = getParameter(PARAM_TEMPERATURE_AHT21)/100.0;
-    float p_humidityAHT21 = getParameter(PARAM_HUMIDITY_AHT21)/100.0;
-    float p_temperature1w = getParameter(PARAM_TEMPERATURE_EXT)/100.0;
-    float p_temperature1w2 = getParameter(PARAM_TEMPERATURE_EXT2)/100.0;
-    int p_batteryLevel = getParameter(PARAM_BATTERY_LEVEL);
 
+  
+
+    DateTime now = myRTC.now();   // Get time stamp for log
+    
+    if(xSemaphoreTake(mutex,0) == pdTRUE){
+
+    // Retrieve log values
+    p_temperature = getParameter(PARAM_TEMPERATURE)/100.0;
+    p_humidity = getParameter(PARAM_HUMIDITY)/100.0;
+    p_temperatureAHT21 = getParameter(PARAM_TEMPERATURE_AHT21)/100.0;
+    p_humidityAHT21 = getParameter(PARAM_HUMIDITY_AHT21)/100.0;
+    p_temperature1w = getParameter(PARAM_TEMPERATURE_EXT)/100.0;
+    p_temperature1w2 = getParameter(PARAM_TEMPERATURE_EXT2)/100.0;
+    p_batteryLevel = getParameter(PARAM_BATTERY_LEVEL);
+    
+   // String logTime = String(now.year()) + String(now.month() + String(now.day()) + String(now.hour()) + String(now.second()));
+   // Serial.println("LOG TIME = " + logTime);
+   // currentLog2 = logTime + ',' + String(p_temperature) + ',' + String(p_humidity) + ',' + String(p_temperatureAHT21) + ',' + String(p_humidityAHT21) + 
+   // ',' + String(p_temperature1w) + ',' + String(p_temperature1w2) + ',' + String(p_batteryLevel);
+   // Serial.println("CURRENT LOG = " + currentLog2);
+
+
+     currentLog = getLogNow();
+
+    xSemaphoreGive(mutex);
+
+    }
 
     // Only transmit values, not error codes
-    if (String(p_temperature) != "0.01" && String(p_temperature) != "-0.01" && p_temperature != 0){
+      if (String(p_temperature) != "0.01" && String(p_temperature) != "-0.01" && p_temperature != 0){
       uint16_t packetId1 = mqttClient.publish((DEVICE_ID+"/temperature").c_str(), 0, true, String(p_temperature).c_str());
       Serial.println("p_temperature = "+String(p_temperature));
-    }
+      }
     // Only transmit values, not error codes
     if (p_humidity != 0 && String(p_humidity) != "-0.01"){
       uint16_t packetId2 = mqttClient.publish((DEVICE_ID+"/humidity").c_str(), 0, true, String(p_humidity).c_str()); 
@@ -72,30 +114,36 @@ void TaskMQTT(void* pvParameters) {
     }
     // Only transmit values, not error codes
     if (String(p_temperatureAHT21) != "0.01" && String(p_temperatureAHT21) != "-0.01" && p_temperatureAHT21 != 0){
-      uint16_t packetId1 = mqttClient.publish((DEVICE_ID+"/temperatureAHT21").c_str(), 0, true, String(p_temperatureAHT21).c_str());
+      uint16_t packetId3 = mqttClient.publish((DEVICE_ID+"/temperatureAHT21").c_str(), 0, true, String(p_temperatureAHT21).c_str());
       Serial.println("p_temperatureAHT21 = "+String(p_temperatureAHT21));
     }
     // Only transmit values, not error codes
     if (p_humidityAHT21 != 0 && String(p_humidityAHT21) != "-0.01"){
-      uint16_t packetId2 = mqttClient.publish((DEVICE_ID+"/humidityAHT21").c_str(), 0, true, String(p_humidityAHT21).c_str()); 
+      uint16_t packetId4 = mqttClient.publish((DEVICE_ID+"/humidityAHT21").c_str(), 0, true, String(p_humidityAHT21).c_str()); 
       Serial.println("p_humidityAHT21 = "+String(p_humidityAHT21));
     }
      // Only transmit values, not error codes
     if (p_temperature1w != -127 && p_temperature1w != 0){
-      uint16_t packetId3 = mqttClient.publish((DEVICE_ID+"/temperature1wire").c_str(), 0, true, String(p_temperature1w).c_str());
+      uint16_t packetId5 = mqttClient.publish((DEVICE_ID+"/temperature1wire").c_str(), 0, true, String(p_temperature1w).c_str());
       Serial.println("p_temperature1w = "+String(p_temperature1w));
     }
       // Only transmit values, not error codes
     if (p_temperature1w2 != -127 && p_temperature1w2 != 0){
-      uint16_t packetId3 = mqttClient.publish((DEVICE_ID+"/temperature1wire2").c_str(), 0, true, String(p_temperature1w2).c_str());
+      uint16_t packetId6 = mqttClient.publish((DEVICE_ID+"/temperature1wire2").c_str(), 0, true, String(p_temperature1w2).c_str());
       Serial.println("p_temperature1w2 = "+String(p_temperature1w2));
     }
 
     // This is the raw NCR18650b Li-ion battery level (~1600 equivalent to 2.585V is almost empty (can't connect to WiFi anymore), ~2300 equivalent to 4.10V full battery, non linear to be tested with other batteries - Value may be 40 higher when in full charge)
     if(p_batteryLevel > 1000 && p_batteryLevel < 2700){   // to avoid false values when charging
-    uint16_t packetId5 = mqttClient.publish((DEVICE_ID+"/batteryLevel").c_str(), 0, true, String(p_batteryLevel).c_str());   
+    uint16_t packetId7 = mqttClient.publish((DEVICE_ID+"/batteryLevel").c_str(), 0, true, String(p_batteryLevel).c_str());   
     // vTaskDelay(10 * 1000);
     }   
+
+    uint16_t packetId8 = mqttClient.publish((DEVICE_ID+"/log").c_str(), 0, true, currentLog.c_str());
+
+    vTaskDelay(1000);   
+
+    
     Serial.println("Finished publishing to MQTT, GOING TO SLEEP NOW");
     goToDeepSleep();
   }

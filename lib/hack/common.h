@@ -3,6 +3,11 @@
 #include "FS.h"
 #include "SD.h"
 #include "SPI.h"
+#include <esp_task_wdt.h>            // Watchdog timer 
+// DS3231 RTC clock
+#include <Wire.h>
+#include <DS3231.h>
+
 
 // #define THR_WIRE_MASTER 1
 
@@ -27,9 +32,12 @@ extern int16_t parameters[MAX_PARAM];
 extern byte MENU_NUMBER; 
 extern byte WIFI_CONNECT_TIMEOUT; 
 extern int32_t LOG_INTERVAL_DURATION;  //in seconds 
+extern SemaphoreHandle_t mutex;
+
 
 void goToDeepSleep();
 void logToSDcard();
+String getLogNow();
 
 // SD card primary functions
 void listDir(fs::FS &fs, const char * dirname, uint8_t levels);
@@ -40,3 +48,4 @@ void writeFile(fs::FS &fs, const char * path, const char * message);
 void appendFile(fs::FS &fs, const char * path, const char * message);
 void renameFile(fs::FS &fs, const char * path1, const char * path2);
 void deleteFile(fs::FS &fs, const char * path);
+

@@ -36,6 +36,8 @@ void handleCommand(AsyncWebServerRequest* request) {
 }
 
 void TaskWebserver(void* pvParameters) {
+
+  esp_task_wdt_add(NULL); //add current thread to WDT watch
   if (!SPIFFS.begin(true)) {
     Serial.println("An Error has occurred while mounting SPIFFS");
     return;

@@ -11,9 +11,12 @@
 #include <esp_task_wdt.h>            // Watchdog timer 
 
 
-#define WDT_TIMEOUT 15               // in seconds (if reached before deep sleep starts this will restart the ESP32)
+#define WDT_TIMEOUT 15               // in seconds (if reached before deep sleep, restarts the ESP32)
 byte WIFI_CONNECT_TIMEOUT = 6;
 int32_t LOG_INTERVAL_DURATION = 60;    // The deep sleep period in seconds will be LOG_INTERVAL_DURATION - millis()/1000 
+
+
+
 
 void taskBlink();
 void taskSerial();
@@ -27,7 +30,7 @@ void taskSI7021();
 void taskOneWire();
 void taskOLEDscreen();
 void taskBatteryLevel();
-void taskRotaryButton();
+// void taskRotaryButton();
 void taskAHT21();
 
 
@@ -53,14 +56,42 @@ void goToDeepSleep(){
  Serial.println("This is after deep sleep and will never be printed.");
 }
 
-void logToSDcard(){
-Serial.print("START=");
-    Serial.println(millis());
 
-  Serial.println("Parameters will be logged to SD card");
+String fullCSVlog = "";
+String logTime = "";
+RTClib myRTC;
+
+
+byte Year;
+byte Month;
+byte Day;
+
+String getLogNow(){
+  
+ DateTime now = myRTC.now();   // Get time stamp for log
+ Year = now.year();
+ Month = now.month();
+ Day = now.day();
+
+ logTime = String(Year);
+ // Add "0" to displayed time if values below 10
+ if (Month < 10){ logTime += '0';} 
+ logTime += Month;
+ if (Day < 10){ logTime += "0";}
+ logTime += Day;
+ if (now.hour() < 10) { logTime += "0";}
+ logTime += now.hour();
+ if (now.minute() < 10) { logTime += "0";}
+ logTime += now.minute();
+ if (now.second() < 10) { logTime += "0";}
+ logTime += now.second();
+
+
+ Serial.println("LOG TIME = " + logTime);
+
+ fullCSVlog = logTime + ',';    // Add timestamp at start of log
+    
     float paramValue = 0;
-    String fullCSVlog = "";
-
     for (int i = 0; i < MAX_PARAM; i++) {     // loop through parameters
        if(i == 48 || i == 49){                // these do not need to be divided by 100
          paramValue = getParameter(i);
@@ -76,8 +107,23 @@ Serial.print("START=");
   fullCSVlog = fullCSVlog + "\n";
   Serial.println("ALL PARAMETERS LOG = ");
   Serial.println(fullCSVlog);
-  
 
+ return fullCSVlog;
+
+}
+
+String nowLog = "";
+String outputFileName = "";
+
+void logToSDcard(){
+
+  nowLog = getLogNow();
+  
+  // outputFileName = String(Year) + "-" + String(Month) + "-" + String(Day) + ".log";
+  Serial.println("will be logged to SD card");
+  Serial.print("START=");
+  Serial.println(millis());
+  
    SPI.begin(14, 2, 15);
     if(!SD.begin(13)){
         Serial.println("Card Mount Failed");
@@ -99,21 +145,14 @@ Serial.print("START=");
     Serial.printf("Free space: %lluMB\n", freeSpace);
   // listDir(SD, "/", 0);
     createDir(SD, "/BeeMoS_logs");
-    createDir(SD, "/BeeMoS_logs/2022");
-    createDir(SD, "/BeeMoS_logs/2022/raw");
-    createDir(SD, "/BeeMoS_logs/2022/filtered");
-    appendFile(SD, "/BeeMoS_logs/2022/raw/temp.log", (fullCSVlog).c_str());
+    appendFile(SD, "/BeeMoS_logs/offline_temp.log", nowLog.c_str());
    // deleteFile(SD, "/hello.txt");
    // readFile(SD, "/hello.txt");
     Serial.print("END=");
     Serial.println(millis());
-
-
 }
-
-
-
-
+    
+  
 
 void setup() {
   
@@ -121,7 +160,10 @@ void setup() {
   Serial.begin(115200);                    // only for debug purpose
   adc_power_on();                          // After wakeup from deepsleep
   esp_task_wdt_init(WDT_TIMEOUT, true);    // Set watchdog timer
+ 
   setupParameters();
+
+
   taskSerial();
   taskWebserver();
   taskNTPD();
@@ -135,7 +177,7 @@ void setup() {
   taskBatteryLevel();
   taskBlink();
   
-  taskRotaryButton();
+//  taskRotaryButton();  // Comment when not wired/used
   // taskAHT21();
   
 }

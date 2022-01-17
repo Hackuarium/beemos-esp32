@@ -2,8 +2,10 @@
 #include <ArduinoOTA.h>
 #include <ESPmDNS.h>
 #include <WiFi.h>
+#include <common.h>
 
 void TaskOTA(void* pvParameters) {
+  esp_task_wdt_add(NULL); //add current thread to WDT watch
   while (WiFi.status() != WL_CONNECTED) {
     vTaskDelay(5000);
   }

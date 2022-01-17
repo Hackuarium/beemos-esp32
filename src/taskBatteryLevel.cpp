@@ -4,6 +4,7 @@
 
 void TaskBatteryLevel(void* pvParameters) {
   (void)pvParameters;
+  esp_task_wdt_add(NULL); //add current thread to WDT watch
 
   pinMode(36, INPUT);
 
@@ -12,11 +13,15 @@ void TaskBatteryLevel(void* pvParameters) {
     vTaskDelay(100);
     // Emergency sleep to allow the battery to charge enough to connect to WiFi (below this value WiFi will reset the board without allowing deepsleep)
     if (raw_level < 1600 && raw_level > 1300){
-      Serial.println("EMERGENCY deep sleep");
+      Serial.println("EMERGENCY deep sleep"); 
        goToDeepSleep();
     }
+    // Critical section (to avoid PARAMETERS being read/written at the same time by different tasks): use mutex
+    if(xSemaphoreTake(mutex,0) == pdTRUE){
     setParameter(PARAM_BATTERY_LEVEL, raw_level);
-    // Serial.println("raw_level = "+String(raw_level));
+    xSemaphoreGive(mutex);
+    }
+
     vTaskDelay(900);
   }
 }

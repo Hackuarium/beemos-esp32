@@ -7,6 +7,8 @@ void TaskSI7021(void* pvParameters) {
   Adafruit_Si7021 sensor = Adafruit_Si7021();
   vTaskDelay(100);
   (void)pvParameters;
+
+  esp_task_wdt_add(NULL); //add current thread to WDT watch
   
   while (!sensor.begin()) {                            
     Serial.println("Did not find Si7021 sensor!");
@@ -25,9 +27,7 @@ void TaskSI7021(void* pvParameters) {
       vTaskDelay(100);
       tries++;
     }
-    if (s_temp != 0 && s_temp != -1 && s_temp != 1){  // Set parameter except if there were errors despite max_tries
-	    setParameter(PARAM_TEMPERATURE, s_temp);
-    }
+
 
     int s_humidity = 100*sensor.readHumidity(); 
     tries=0;
@@ -37,9 +37,23 @@ void TaskSI7021(void* pvParameters) {
       vTaskDelay(100);
       tries++;
     }
-    if (s_humidity != 0 && s_humidity != -1 && s_humidity != 1){  // Set parameter except if there were errors despite max_tries
+
+    if(xSemaphoreTake(mutex,0) == pdTRUE){
+    
+      if (s_temp != 0 && s_temp != -1 && s_temp != 1){  // Set parameter except if there were errors despite max_tries
+	    setParameter(PARAM_TEMPERATURE, s_temp);
+      }
+      if (s_humidity != 0 && s_humidity != -1 && s_humidity != 1){  // Set parameter except if there were errors despite max_tries
 	    setParameter(PARAM_HUMIDITY, s_humidity);
+      }
+      
+    xSemaphoreGive(mutex);
     }
+
+     else{
+            printf("semaphore is taken by someone else \n");
+            vTaskDelete(0);
+        }
 
     vTaskDelay(1000);
   }
@@ -51,7 +65,7 @@ void taskSI7021() {
                           2048,  // This stack size can be checked & adjusted by
                                  // reading the Stack Highwater
                           NULL,
-                          3,  // Priority, with 3 (configMAX_PRIORITIES - 1)
+                          2,  // Priority, with 3 (configMAX_PRIORITIES - 1)
                               // being the highest, and 0 being the lowest.
                           NULL, 1);
 }

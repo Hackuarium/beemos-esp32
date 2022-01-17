@@ -8,11 +8,15 @@ char ssid[20];
 char password[20];
 
 
-
-
 void TaskWifi(void* pvParameters) {
+
+  esp_task_wdt_add(NULL); //add current thread to WDT watch
+  // Critical section (to avoid PARAMETERS being read/written at the same time by different tasks): use mutex
+  if(xSemaphoreTake(mutex,0) == pdTRUE){
   getParameter("wifi.ssid", ssid);
   getParameter("wifi.password",password);
+  xSemaphoreGive(mutex);
+  }
 
   Serial.print("Trying to connect to ");
   Serial.println(ssid);

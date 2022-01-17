@@ -7,7 +7,7 @@ AHT20 AHT21Sensor;
 
 void TaskAHT21(void* pvParameters) {
   (void)pvParameters;
-
+  esp_task_wdt_add(NULL); //add current thread to WDT watch
 
   vTaskDelay(100);
    Wire.begin(21,22);  
@@ -34,9 +34,6 @@ void TaskAHT21(void* pvParameters) {
       vTaskDelay(100);
       tries++;
     }
-    if (s_temp != 0 && s_temp != -1 && s_temp != 1){  // Set parameter except if there were errors despite max_tries
-	    setParameter(PARAM_TEMPERATURE_AHT21, s_temp);
-    }
 
     int s_humidity = 100*AHT21Sensor.getHumidity(); 
    // Serial.println(String("")+"AHT21 hygro = "+AHT21Sensor.getHumidity()+"%");
@@ -47,9 +44,22 @@ void TaskAHT21(void* pvParameters) {
       vTaskDelay(100);
       tries++;
     }
+
+
+// Critical section (to avoid PARAMETERS being read/written at the same time by different tasks): use mutex
+    if(xSemaphoreTake(mutex,0) == pdTRUE){
+    
     if (s_humidity != 0 && s_humidity != -1 && s_humidity != 1){  // Set parameter except if there were errors despite max_tries
 	    setParameter(PARAM_HUMIDITY_AHT21, s_humidity);
     }
+    if (s_temp != 0 && s_temp != -1 && s_temp != 1){  // Set parameter except if there were errors despite max_tries
+	    setParameter(PARAM_TEMPERATURE_AHT21, s_temp);
+    }
+    xSemaphoreGive(mutex);
+    }
+
+
+
 
     }
     vTaskDelay(1000);
