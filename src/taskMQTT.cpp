@@ -36,7 +36,7 @@ int p_batteryLevel;
 String currentLog;
 
 // Name the device here (used in part in MQQT topics)
-String DEVICE_ID = "esp32";
+String DEVICE_ID = "esp321";
 
 
 

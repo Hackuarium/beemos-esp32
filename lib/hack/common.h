@@ -35,6 +35,7 @@ extern int32_t LOG_INTERVAL_DURATION;  //in seconds
 extern SemaphoreHandle_t mutex;
 
 
+
 void goToDeepSleep();
 void logToSDcard();
 String getLogNow();

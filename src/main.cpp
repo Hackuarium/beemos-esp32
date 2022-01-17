@@ -62,7 +62,7 @@ String logTime = "";
 RTClib myRTC;
 
 
-byte Year;
+int Year;
 byte Month;
 byte Day;
 
@@ -74,6 +74,7 @@ String getLogNow(){
  Day = now.day();
 
  logTime = String(Year);
+ Serial.println("YEAR = "+String(Year));
  // Add "0" to displayed time if values below 10
  if (Month < 10){ logTime += '0';} 
  logTime += Month;
@@ -115,6 +116,8 @@ String getLogNow(){
 String nowLog = "";
 String outputFileName = "";
 
+const String offlineLogsPath = "/BeeMoS_logs/offline_temp.log";
+
 void logToSDcard(){
 
   nowLog = getLogNow();
@@ -145,7 +148,7 @@ void logToSDcard(){
     Serial.printf("Free space: %lluMB\n", freeSpace);
   // listDir(SD, "/", 0);
     createDir(SD, "/BeeMoS_logs");
-    appendFile(SD, "/BeeMoS_logs/offline_temp.log", nowLog.c_str());
+    appendFile(SD, offlineLogsPath.c_str(), nowLog.c_str());
    // deleteFile(SD, "/hello.txt");
    // readFile(SD, "/hello.txt");
     Serial.print("END=");
