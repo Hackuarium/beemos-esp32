@@ -73,7 +73,7 @@ void TaskMQTT(void* pvParameters) {
 //  mqttClient.onSubscribe(onMqttSubscribe);
 //  mqttClient.onUnsubscribe(onMqttUnsubscribe);
   // mqttClient.onMessage(onMqttMessage);
-  
+
   Serial.println("MQTT task: Checking for previous offline logs...");
   // check if there is a temporary file in SD card (saved offline logs) 
   handleOfflineData();
@@ -246,7 +246,7 @@ void handleOfflineData(){
   SPI.begin(14, 2, 15);
     if(!SD.begin(13)){
         Serial.println("Card Mount Failed");
-        goToDeepSleep();
+        return;
     }
     File tempfile2 = SD.open(offlineLogsPath2);
 
