@@ -134,4 +134,3 @@ void deleteFile(fs::FS &fs, const char * path){
 extern SemaphoreHandle_t mutex = xSemaphoreCreateMutex();  // For MUTual EXclusion between tasks of critical code sections
   // xSemaphoreGive(mutex);
 
-

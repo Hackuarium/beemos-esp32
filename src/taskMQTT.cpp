@@ -11,8 +11,6 @@
 #include <esp_task_wdt.h>                  // Watchdog timer 
 
 
-
-
 AsyncMqttClient mqttClient;
 
 char broker[20];
@@ -37,8 +35,8 @@ String currentLog;
 
 // Name the device here (used in part in MQQT topics)
 String DEVICE_ID = "esp321";
-
-
+// Where to store offline logs on SD card
+String offlineLogsPath2 = "/BeeMoS_logs/offline_temp.log";
 
 
 
@@ -59,6 +57,11 @@ void TaskMQTT(void* pvParameters) {
   }
 
 
+
+
+  
+
+
   mqttClient.setServer(broker, 1883);
   mqttClient.connect();
 
@@ -70,14 +73,40 @@ void TaskMQTT(void* pvParameters) {
 //  mqttClient.onSubscribe(onMqttSubscribe);
 //  mqttClient.onUnsubscribe(onMqttUnsubscribe);
   // mqttClient.onMessage(onMqttMessage);
+  
+  Serial.println("MQTT task: Checking for previous offline logs...");
+  // check if there is a temporary file in SD card (saved offline logs) 
+  handleOfflineData();
+
   RTClib myRTC;
   while (true) {
+  ///////////////////////////////////////////////////////
+  // TO DO: recover and publish offline logs here, add mutex 
+
+  /*
+  String offlineLogsPath = "/BeeMoS_logs/offline_temp.log";
+   SPI.begin(14, 2, 15);
+  if(!SD.begin(13)){
+        Serial.println("Card Mount Failed");
+        goToDeepSleep();
+    }
+
+    File file2 = SD.open(offlineLogsPath);
+     String thisLine="";
+     while(file2.available()){
+       thisLine = file2.read();
+       Serial.println("ThisLine = "+String(thisLine));
+       //uint16_t packetId8 = mqttClient.publish((DEVICE_ID+"/log").c_str(), 0, true, thisLine.c_str());
+    }
+    file2.close();
+*/
+   
+   ///////////////////
+   
     Serial.println("Publish to MQTT server task");
 
-  
-
     DateTime now = myRTC.now();   // Get time stamp for log
-    
+
     if(xSemaphoreTake(mutex,0) == pdTRUE){
 
     // Retrieve log values
@@ -206,4 +235,44 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   Serial.println(strlen(payload));
   Serial.println(sizeof(*payload));
   Serial.println(payload);
+}
+
+String content="";
+String buffer="";
+int numberOfLogs=0;
+
+void handleOfflineData(){
+
+  SPI.begin(14, 2, 15);
+    if(!SD.begin(13)){
+        Serial.println("Card Mount Failed");
+        goToDeepSleep();
+    }
+    File tempfile2 = SD.open(offlineLogsPath2);
+
+     if(!tempfile2){
+      Serial.println("The file "+offlineLogsPath2+ " does not exist or can't be opened, no offline logs to publish.");
+
+     }
+     else {
+            Serial.println("The file "+offlineLogsPath2+ " does exist, offline logs will be published and deleted:");
+
+        
+        numberOfLogs=0;
+  
+        while(tempfile2.available()){
+          // publish each offline log
+          buffer = tempfile2.readStringUntil('\n');
+          mqttClient.publish((DEVICE_ID+"/log").c_str(), 0, true, buffer.c_str());
+          numberOfLogs++;
+          // Serial.println(buffer);
+          }
+
+         // At this point the transfer is over, close file and delete it
+         tempfile2.close();
+         deleteFile(SD,offlineLogsPath2.c_str());
+         Serial.println("Published "+String(numberOfLogs)+" offline log(s).");
+     }
+  tempfile2.close();
+    
 }

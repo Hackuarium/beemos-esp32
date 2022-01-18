@@ -39,6 +39,7 @@ extern SemaphoreHandle_t mutex;
 void goToDeepSleep();
 void logToSDcard();
 String getLogNow();
+void handleOfflineData();
 
 // SD card primary functions
 void listDir(fs::FS &fs, const char * dirname, uint8_t levels);

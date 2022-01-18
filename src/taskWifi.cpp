@@ -60,12 +60,14 @@ Serial.println("Starting wifi server");
     logToSDcard();     // log values on memory resilient to sleep 
     goToDeepSleep();    
   } else {
+    
 
   Serial.println("");
   Serial.print("Connected to ");
   Serial.println(ssid);
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
+
   }
 
   while (true) {
