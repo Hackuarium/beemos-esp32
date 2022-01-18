@@ -274,5 +274,5 @@ void handleOfflineData(){
          Serial.println("Published "+String(numberOfLogs)+" offline log(s).");
      }
   tempfile2.close();
-    
+  vTaskDelay(400); // Give some time to allow WiFi RSSI to be computed for the new online log    
 }

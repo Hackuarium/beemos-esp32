@@ -60,7 +60,6 @@ Serial.println("Starting wifi server");
     logToSDcard();     // log values on memory resilient to sleep 
     goToDeepSleep();    
   } else {
-    
 
   Serial.println("");
   Serial.print("Connected to ");
@@ -74,10 +73,15 @@ Serial.println("Starting wifi server");
     vTaskDelay(1000);
       if (WiFi.status() != WL_CONNECTED) {
         WiFi.disconnect();
-        vTaskDelay(5000);
+        vTaskDelay(3000);
         WiFi.reconnect();
       }
+       // Protect simulatneous read/Write of different tasks to common resource (parameters) using mutex
+  if(xSemaphoreTake(mutex,0) == pdTRUE){ 
        setParameter(PARAM_WIFI_RSSI, WiFi.RSSI());
+       xSemaphoreGive(mutex);
+    }
+      // Serial.println("GOT RSSI");
   }
 }
  
