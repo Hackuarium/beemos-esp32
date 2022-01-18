@@ -14,6 +14,7 @@
 #define WDT_TIMEOUT 15               // in seconds (if reached before deep sleep, restarts the ESP32)
 byte WIFI_CONNECT_TIMEOUT = 6;
 int32_t LOG_INTERVAL_DURATION = 60;    // The deep sleep period in seconds will be LOG_INTERVAL_DURATION - millis()/1000 
+String offlineLogsPath = "/BeeMoS_logs/offline_temp.log";
 
 
 
@@ -74,7 +75,7 @@ String getLogNow(){
  Day = now.day();
 
  logTime = String(Year);
- Serial.println("YEAR = "+String(Year));
+
  // Add "0" to displayed time if values below 10
  if (Month < 10){ logTime += '0';} 
  logTime += Month;
@@ -116,7 +117,6 @@ String getLogNow(){
 String nowLog = "";
 String outputFileName = "";
 
-const String offlineLogsPath = "/BeeMoS_logs/offline_temp.log";
 
 void logToSDcard(){
 
@@ -130,7 +130,7 @@ void logToSDcard(){
    SPI.begin(14, 2, 15);
     if(!SD.begin(13)){
         Serial.println("Card Mount Failed");
-        goToDeepSleep();
+        return;
     }
     
     uint8_t cardType = SD.cardType();
@@ -146,17 +146,34 @@ void logToSDcard(){
     Serial.printf("SD Card Size: %lluMB\n", cardSize);
     Serial.printf("Used space: %lluMB\n", usedSpace);
     Serial.printf("Free space: %lluMB\n", freeSpace);
+
+    File tempfile = SD.open("/BeeMoS_logs/offline_temp.log");
+    if(!tempfile){
+      Serial.println("The file "+offlineLogsPath+ " does not exist and will be created:");
+      tempfile.close();
+      listDir(SD, "/", 0);
+      createDir(SD, "/BeeMoS_logs");
+      listDir(SD, "/BeeMoS_logs", 0);
+      vTaskDelay(500);
+      writeFile(SD, "/BeeMoS_logs/offline_temp.log", nowLog.c_str()); // Create new file if does not exist
+      vTaskDelay(500);
+    }
+    
+    else{
   // listDir(SD, "/", 0);
-    createDir(SD, "/BeeMoS_logs");
+   
     appendFile(SD, offlineLogsPath.c_str(), nowLog.c_str());
+    tempfile.close();
    // deleteFile(SD, "/hello.txt");
    // readFile(SD, "/hello.txt");
     Serial.print("END=");
     Serial.println(millis());
+    }
 }
+
+
     
   
-
 void setup() {
   
   setCpuFrequencyMhz(80);                  // to reduce power consumption
